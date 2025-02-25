@@ -1,39 +1,905 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Excel to Table with Brython</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.1/xlsx.full.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MyMoney - Track Expenses & Budget</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython_stdlib.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #F5F5F5;
+            --text-color: #333333;
+            --light-gray: #EEEEEE;
+            --red: #F44336;
+            --green: #4CAF50;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: #FAFAFA;
+            color: var(--text-color);
+        }
+        
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .summary-card {
+            padding: 16px;
+            background-color: white;
+            margin: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .balance-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .balance-amount {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .expense-income-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .expense-box, .income-box {
+            flex: 1;
+        }
+        
+        .expense-amount {
+            color: var(--red);
+            font-weight: bold;
+        }
+        
+        .income-amount {
+            color: var(--green);
+            font-weight: bold;
+        }
+        
+        .transactions-list {
+            margin: 16px;
+        }
+        
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .transaction-item {
+            display: flex;
+            padding: 12px;
+            border-bottom: 1px solid var(--light-gray);
+            align-items: center;
+        }
+        
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--light-gray);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 12px;
+        }
+        
+        .transaction-details {
+            flex: 1;
+        }
+        
+        .transaction-title {
+            font-weight: 500;
+        }
+        
+        .transaction-category {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .transaction-amount {
+            font-weight: bold;
+        }
+        
+        .expense-amount {
+            color: var(--red);
+        }
+        
+        .income-amount {
+            color: var(--green);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 72px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px 8px 0 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+            animation: slide-up 0.3s ease;
+        }
+        
+        @keyframes slide-up {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .type-selector {
+            display: flex;
+            margin-bottom: 16px;
+        }
+        
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background-color: var(--light-gray);
+            cursor: pointer;
+        }
+        
+        .type-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .type-btn:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .type-btn:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* View selectors */
+        #home-view, #statistics-view, #budget-view, #settings-view {
+            padding-bottom: 64px;
+        }
+        
+        #statistics-view, #budget-view, #settings-view {
+            display: none;
+        }
+        
+        /* Statistics View */
+        .chart-container {
+            background-color: white;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .period-selector {
+            display: flex;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .period-btn {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        .period-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .chart-bar {
+            flex: 1;
+            background-color: var(--primary-color);
+            height: 0;
+            transition: height 0.5s ease;
+            position: relative;
+            min-width: 24px;
+        }
+        
+        .chart-bar-label {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .chart-bar-value {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .categories-list {
+            margin: 16px;
+        }
+        
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .category-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            margin-right: 8px;
+        }
+        
+        .category-name {
+            flex: 1;
+        }
+        
+        .category-percentage {
+            margin-right: 8px;
+            color: #666;
+        }
+        
+        /* Budget View */
+        .budget-card {
+            background-color: white;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .budget-progress {
+            height: 8px;
+            background-color: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .budget-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        
+        .budget-bar.over {
+            background-color: var(--red);
+        }
+        
+        .budget-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Settings View */
+        .settings-list {
+            margin: 16px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .settings-item {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-icon {
+            margin-right: 12px;
+            color: #666;
+        }
+        
+        .settings-title {
+            flex: 1;
+        }
+        
+        .settings-arrow {
+            color: #666;
+        }
+    </style>
 </head>
 <body onload="brython()">
-    <h1>Excel to Table with Brython</h1>
-    <form id="upload_form">
-        <label for="excel_file">Choose an Excel file:</label>
-        <input type="file" id="excel_file" accept=".xlsx, .xls">
-    </form>
-    <table id="excel_table" border="1"></table>
+<div class="app-container">
+    <header>
+        <div class="header-title">MyMoney</div>
+        <div class="header-actions">
+            <div id="search-btn">🔍</div>
+            <div id="more-btn">⋮</div>
+        </div>
+    </header>
+    
+    <!-- Home View -->
+    <div id="home-view">
+        <div class="summary-card">
+            <div class="balance-row">
+                <div class="balance-label">Current Balance</div>
+                <div class="balance-amount" id="balance-amount">$0.00</div>
+            </div>
+            <div class="expense-income-row">
+                <div class="expense-box">
+                    <div class="balance-label">Expense</div>
+                    <div class="expense-amount" id="expense-amount">$0.00</div>
+                </div>
+                <div class="income-box">
+                    <div class="balance-label">Income</div>
+                    <div class="income-amount" id="income-amount">$0.00</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="transactions-list">
+            <div class="transactions-header">
+                <div>Recent Transactions</div>
+                <div id="view-all">View All</div>
+            </div>
+            <div id="transactions-container">
+                <!-- Transactions will be added here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics View -->
+    <div id="statistics-view">
+        <div class="chart-container">
+            <div class="chart-header">
+                <div>Expense Analysis</div>
+                <div class="period-selector">
+                    <div class="period-btn active" data-period="week">Week</div>
+                    <div class="period-btn" data-period="month">Month</div>
+                    <div class="period-btn" data-period="year">Year</div>
+                </div>
+            </div>
+            <div class="chart" id="expense-chart">
+                <!-- Chart bars will be added here -->
+            </div>
+        </div>
+        
+        <div class="categories-list">
+            <div class="transactions-header">
+                <div>Categories</div>
+                <div>February 2025</div>
+            </div>
+            <div id="categories-container">
+                <!-- Categories will be added here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Budget View -->
+    <div id="budget-view">
+        <div class="transactions-header" style="margin: 16px;">
+            <div>Monthly Budgets</div>
+            <div>February 2025</div>
+        </div>
+        <div id="budgets-container">
+            <!-- Budgets will be added here -->
+        </div>
+    </div>
+    
+    <!-- Settings View -->
+    <div id="settings-view">
+        <div class="settings-list">
+            <div class="settings-item">
+                <div class="settings-icon">👤</div>
+                <div class="settings-title">Account</div>
+                <div class="settings-arrow">›</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-icon">🔔</div>
+                <div class="settings-title">Notifications</div>
+                <div class="settings-arrow">›</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-icon">💵</div>
+                <div class="settings-title">Currency</div>
+                <div class="settings-arrow">›</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-icon">🔄</div>
+                <div class="settings-title">Backup & Restore</div>
+                <div class="settings-arrow">›</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-icon">🎨</div>
+                <div class="settings-title">Theme</div>
+                <div class="settings-arrow">›</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-icon">❓</div>
+                <div class="settings-title">Help & Support</div>
+                <div class="settings-arrow">›</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Expense/Income Modal -->
+    <div class="modal" id="add-transaction-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Add Transaction</div>
+                <div class="close-btn" id="close-modal">×</div>
+            </div>
+            <div class="type-selector">
+                <div class="type-btn active" data-type="expense">Expense</div>
+                <div class="type-btn" data-type="income">Income</div>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category">
+                    <option value="">Select Category</option>
+                    <!-- Categories will be added here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date">
+            </div>
+            <div class="form-group">
+                <label for="note">Note</label>
+                <input type="text" id="note" placeholder="Add a note">
+            </div>
+            <button class="submit-btn" id="save-transaction">Save</button>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="fab" id="add-transaction-btn">+</div>
+    <div class="bottom-nav">
+        <div class="nav-item active" data-view="home-view">
+            <div>🏠</div>
+            <div>Home</div>
+        </div>
+        <div class="nav-item" data-view="statistics-view">
+            <div>📊</div>
+            <div>Stats</div>
+        </div>
+        <div class="nav-item" data-view="budget-view">
+            <div>💰</div>
+            <div>Budget</div>
+        </div>
+        <div class="nav-item" data-view="settings-view">
+            <div>⚙️</div>
+            <div>Settings</div>
+        </div>
+    </div>
+</div>
 
-    <script type="text/python">
-        from browser import document, html
-        import pandas as pd
-        import io
+<script type="text/python">
+from browser import document, window, alert, localStorage, html
+import json
+import datetime
+import random
 
-        def handle_file(event):
-            file = document["excel_file"].files[0]
-            reader = window.FileReader.new()
-            reader.readAsArrayBuffer(file)
-            reader.bind("load", display_table)
+# Initialize app data
+def init_data():
+    if 'myMoney_transactions' not in localStorage:
+        localStorage['myMoney_transactions'] = json.dumps([])
+    
+    if 'myMoney_categories' not in localStorage:
+        categories = {
+            'expense': [
+                {'id': 'food', 'name': 'Food & Drinks', 'color': '#FF5722', 'icon': '🍔'},
+                {'id': 'transport', 'name': 'Transportation', 'color': '#2196F3', 'icon': '🚗'},
+                {'id': 'shopping', 'name': 'Shopping', 'color': '#E91E63', 'icon': '🛍️'},
+                {'id': 'home', 'name': 'Housing', 'color': '#9C27B0', 'icon': '🏠'},
+                {'id': 'entertainment', 'name': 'Entertainment', 'color': '#FFC107', 'icon': '🎬'},
+                {'id': 'health', 'name': 'Health', 'color': '#4CAF50', 'icon': '💊'},
+                {'id': 'education', 'name': 'Education', 'color': '#3F51B5', 'icon': '📚'},
+                {'id': 'other', 'name': 'Other', 'color': '#607D8B', 'icon': '📦'}
+            ],
+            'income': [
+                {'id': 'salary', 'name': 'Salary', 'color': '#4CAF50', 'icon': '💼'},
+                {'id': 'business', 'name': 'Business', 'color': '#2196F3', 'icon': '📈'},
+                {'id': 'gift', 'name': 'Gifts', 'color': '#E91E63', 'icon': '🎁'},
+                {'id': 'interest', 'name': 'Interest', 'color': '#FFC107', 'icon': '💰'},
+                {'id': 'other_income', 'name': 'Other', 'color': '#607D8B', 'icon': '📦'}
+            ]
+        }
+        localStorage['myMoney_categories'] = json.dumps(categories)
+    
+    if 'myMoney_budgets' not in localStorage:
+        budgets = [
+            {'id': 'food', 'amount': 500, 'spent': 0},
+            {'id': 'transport', 'amount': 300, 'spent': 0},
+            {'id': 'shopping', 'amount': 200, 'spent': 0},
+            {'id': 'entertainment', 'amount': 150, 'spent': 0}
+        ]
+        localStorage['myMoney_budgets'] = json.dumps(budgets)
 
-        def display_table(event):
-            data = io.BytesIO(event.target.result.to_py())
-            df = pd.read_excel(data)
-            table = document["excel_table"]
-            table <= html.TR(html.TH(col) for col in df.columns)
-            for row in df.itertuples(index=False):
-                table <= html.TR(html.TD(cell) for cell in row)
+# Get data
+def get_transactions():
+    return json.loads(localStorage['myMoney_transactions'])
 
-        document["excel_file"].bind("change", handle_file)
-    </script>
-</body>
-</html>
+def get_categories():
+    return json.loads(localStorage['myMoney_categories'])
+
+def get_budgets():
+    return json.loads(localStorage['myMoney_budgets'])
+
+# Save data
+def save_transactions(transactions):
+    localStorage['myMoney_transactions'] = json.dumps(transactions)
+
+def save_budgets(budgets):
+    localStorage['myMoney_budgets'] = json.dumps(budgets)
+
+# Calculate summary
+def calculate_summary():
+    transactions = get_transactions()
+    income = sum(float(t['amount']) for t in transactions if t['type'] == 'income')
+    expense = sum(float(t['amount']) for t in transactions if t['type'] == 'expense')
+    balance = income - expense
+    
+    document['balance-amount'].text = f"${balance:.2f}"
+    document['income-amount'].text = f"${income:.2f}"
+    document['expense-amount'].text = f"${expense:.2f}"
+
+# Format date
+def format_date(date_str):
+    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    return date_obj.strftime('%b %d')
+
+# Render transactions
+def render_transactions():
+    transactions = get_transactions()
+    categories = get_categories()
+    container = document['transactions-container']
+    container.innerHTML = ""
+    
+    # Sort by date (newest first)
+    transactions.sort(key=lambda x: x['date'], reverse=True)
+    
+    # Take only the 5 most recent
+    recent_transactions = transactions[:5]
+    
+    for transaction in recent_transactions:
+        tx_type = transaction['type']
+        category_list = categories[tx_type]
+        category = next((c for c in category_list if c['id'] == transaction['category']), None)
+        
+        if category:
+            icon = category['icon']
+            category_name = category['name']
+        else:
+            icon = '📦'
+            category_name = 'Uncategorized'
+        
+        amount_class = 'expense-amount' if tx_type == 'expense' else 'income-amount'
+        amount_prefix = '-' if tx_type == 'expense' else '+'
+        
+        item = html.DIV(Class='transaction-item')
+        item <= html.DIV(icon, Class='transaction-icon')
+        
+        details = html.DIV(Class='transaction-details')
+        details <= html.DIV(transaction['note'] or category_name, Class='transaction-title')
+        details <= html.DIV(f"{category_name} • {format_date(transaction['date'])}", Class='transaction-category')
+        
+        item <= details
+        item <= html.DIV(f"{amount_prefix}${float(transaction['amount']):.2f}", Class=f'transaction-amount {amount_class}')
+        
+        container <= item
+
+# Render expense chart
+def render_expense_chart():
+    transactions = get_transactions()
+    chart = document['expense-chart']
+    chart.innerHTML = ""
+    
+    # Get current date
+    today = datetime.datetime.now()
+    
+    # Create weekly data (last 7 days)
+    weekly_data = []
+    for i in range(6, -1, -1):
+        date = today - datetime.timedelta(days=i)
+        date_str = date.strftime('%Y-%m-%d')
+        day_label = date.strftime('%a')
+        
+        day_expenses = sum(float(t['amount']) for t in transactions 
+                         if t['type'] == 'expense' and t['date'] == date_str)
+        
+        weekly_data.append({
+            'label': day_label,
+            'value': day_expenses
+        })
+    
+    # Find maximum value for scaling
+    max_value = max(item['value'] for item in weekly_data) if weekly_data else 1
+    if max_value == 0:
+        max_value = 1  # Avoid division by zero
+    
+    # Render bars
+    for item in weekly_data:
+        height = (item['value'] / max_value) * 100
+        height = max(height, 5)  # Minimum height for visibility
+        
+        bar = html.DIV(Class='chart-bar', style={'height': f'{height}%'})
+        bar <= html.DIV(item['label'], Class='chart-bar-label')
+        bar <= html.DIV(f"${item['value']:.0f}", Class='chart-bar-value')
+        
+        chart <= bar
+
+# Render category distribution
+def render_categories_stats():
+    transactions = get_transactions()
+    categories = get_categories()
+    container = document['categories-container']
+    container.innerHTML = ""
+    
+    # Get current month transactions
+    today = datetime.datetime.now()
+    month_start = datetime.datetime(today.year, today.month, 1)
+    month_start_str = month_start.strftime('%Y-%m-%d')
+    
+    month_transactions = [t for t in transactions 
+                        if t['type'] == 'expense' and t['date'] >= month_start_str]
+    
+    total_expense = sum(float(t['amount']) for t in month_transactions)
+    
+    # Calculate category totals
+    category_totals = {}
+    for transaction in month_transactions:
+        category_id = transaction['category']
+        if category_id not in category_totals:
+            category_totals[category_id] = 0
+        category_totals[category_id] += float(transaction['amount'])
+    
+    # Sort by amount (descending)
+    sorted_categories = sorted([(cid, amount) for cid, amount in category_totals.items()], 
+                              key=lambda x: x[1], reverse=True)
+    
+    # Render category items
+    for category_id, amount in sorted_categories:
+        category = next((c for c in categories['expense'] if c['id'] == category_id), None)
+        
+        if category:
+            percentage = (amount / total_expense * 100) if total_expense > 0 else 0
+            
+            item = html.DIV(Class='category-item')
+            item <= html.DIV(Class='category-color', style={'background-color': category['color']})
+            item <= html.DIV(category['name'], Class='category-name')
+            item <= html.DIV(f"{percentage:.1f}%", Class='category-percentage')
+            item <= html.DIV(f"${amount:.2f}", Class='transaction-amount expense-amount')
+            
+            container <= item
+
+# Render budgets
+def render_budgets():
+    budgets = get_budgets()
+    transactions = get_transactions()
+    categories = get_categories()
+    container = document['budgets-container']
+    container.innerHTML = ""
+    
+    # Get current month transactions
+    today = datetime.datetime.now()
+    month_start = datetime.datetime(today.year, today.month, 1)
+    month_start_str = month_start.strftime('%Y-%m-%d')
+    
+    # Calculate spent amount for each budget
+    for budget in budgets:
+        category_id = budget['id']
+        budget['spent'] = sum(float(t['amount']) for t in transactions 
+                           if t['type'] == 'expense' and t['category'] == category_id 
+                           and t['date'] >= month_start_str)
+    
+    # Save updated budgets
+    save_budgets(budgets)
+    
+    # Render budget cards
+    for budget in budgets:
+        category = next((c for c in categories['expense'] if c['id'] == budget['id']), None)
+        if not category:
+            continue
+        
+        budget_amount = float(budget['amount'])
+        spent_amount = float(budget['spent'])
+        
+        percentage = (spent_amount / budget_amount * 100) if budget_amount > 0 else 0
+        over_budget = percentage > 100
+        bar_class = 'budget-bar over' if over_budget else 'budget-bar'
+        
+        card = html.DIV(Class='budget-card')
+        
+        header = html.DIV(Class='budget-header')
+        header <= html.DIV(f"{category['icon']} {category['name']}")
+        header <= html.DIV(f"${spent_amount:.2f} / ${budget_amount:.2f}")
+        
+        card <= header
+        
+        progress = html.DIV(Class='budget-progress')
+        bar = html.DIV(Class=bar_class, style={'width': f"{min(percentage, 100)}%"})
+        progress <= bar
+        
+        card <= progress
+        
+        details = html.DIV(Class='budget-details')
+        details <= html.DIV(f"{percentage:.1f}% used")
+        
+        remaining = budget_amount - spent_amount
+        details <= html.DIV(f"${abs(remaining):.2f} {'over' if remaining < 0 else 'left'}")
+        
+        card <= details
