@@ -1,17 +1,39 @@
-
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Excel Dashboard</title>
+    <title>Excel to Table with Brython</title>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.9.5/brython.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.1/xlsx.full.min.js"></script>
 </head>
 <body onload="brython()">
-    <h1>Excel Dashboard</h1>
-    <input type="file" id="fileInput">
-    <div id="charts"></div>
-    <script type="text/python" src="main.py"></script>
+    <h1>Excel to Table with Brython</h1>
+    <form id="upload_form">
+        <label for="excel_file">Choose an Excel file:</label>
+        <input type="file" id="excel_file" accept=".xlsx, .xls">
+    </form>
+    <table id="excel_table" border="1"></table>
+
+    <script type="text/python">
+        from browser import document, html
+        import pandas as pd
+        import io
+
+        def handle_file(event):
+            file = document["excel_file"].files[0]
+            reader = window.FileReader.new()
+            reader.readAsArrayBuffer(file)
+            reader.bind("load", display_table)
+
+        def display_table(event):
+            data = io.BytesIO(event.target.result.to_py())
+            df = pd.read_excel(data)
+            table = document["excel_table"]
+            table <= html.TR(html.TH(col) for col in df.columns)
+            for row in df.itertuples(index=False):
+                table <= html.TR(html.TD(cell) for cell in row)
+
+        document["excel_file"].bind("change", handle_file)
+    </script>
 </body>
 </html>
