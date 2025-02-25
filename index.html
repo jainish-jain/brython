@@ -648,63 +648,106 @@
 </div>
 
 <script type="text/python">
-from browser import document, window, alert, localStorage, html
+from browser import document, window, alert, html
 import json
 import datetime
 import random
 
+# Helper function to safely use localStorage
+def safe_storage_set(key, value):
+    try:
+        window.localStorage.setItem(key, value)
+    except:
+        pass  # Fail silently
+
+def safe_storage_get(key, default=None):
+    try:
+        return window.localStorage.getItem(key) or default
+    except:
+        return default
+
+# Create sample data for demo if storage is unavailable
+default_transactions = [
+    {"id": "1", "type": "expense", "amount": "45.50", "category": "food", "date": "2025-02-24", "note": "Grocery shopping"},
+    {"id": "2", "type": "expense", "amount": "35.00", "category": "transport", "date": "2025-02-23", "note": "Uber ride"},
+    {"id": "3", "type": "income", "amount": "1500.00", "category": "salary", "date": "2025-02-15", "note": "February salary"},
+    {"id": "4", "type": "expense", "amount": "12.99", "category": "entertainment", "date": "2025-02-20", "note": "Movie ticket"},
+    {"id": "5", "type": "expense", "amount": "78.50", "category": "shopping", "date": "2025-02-18", "note": "New shirt"}
+]
+
+default_categories = {
+    "expense": [
+        {"id": "food", "name": "Food & Drinks", "color": "#FF5722", "icon": "🍔"},
+        {"id": "transport", "name": "Transportation", "color": "#2196F3", "icon": "🚗"},
+        {"id": "shopping", "name": "Shopping", "color": "#E91E63", "icon": "🛍️"},
+        {"id": "home", "name": "Housing", "color": "#9C27B0", "icon": "🏠"},
+        {"id": "entertainment", "name": "Entertainment", "color": "#FFC107", "icon": "🎬"},
+        {"id": "health", "name": "Health", "color": "#4CAF50", "icon": "💊"},
+        {"id": "education", "name": "Education", "color": "#3F51B5", "icon": "📚"},
+        {"id": "other", "name": "Other", "color": "#607D8B", "icon": "📦"}
+    ],
+    "income": [
+        {"id": "salary", "name": "Salary", "color": "#4CAF50", "icon": "💼"},
+        {"id": "business", "name": "Business", "color": "#2196F3", "icon": "📈"},
+        {"id": "gift", "name": "Gifts", "color": "#E91E63", "icon": "🎁"},
+        {"id": "interest", "name": "Interest", "color": "#FFC107", "icon": "💰"},
+        {"id": "other_income", "name": "Other", "color": "#607D8B", "icon": "📦"}
+    ]
+}
+
+default_budgets = [
+    {"id": "food", "amount": 500, "spent": 45.50},
+    {"id": "transport", "amount": 300, "spent": 35.00},
+    {"id": "shopping", "amount": 200, "spent": 78.50},
+    {"id": "entertainment", "amount": 150, "spent": 12.99}
+]
+
 # Initialize app data
 def init_data():
-    if 'myMoney_transactions' not in localStorage:
-        localStorage['myMoney_transactions'] = json.dumps([])
+    # Try to load data from localStorage, fall back to defaults if not available
+    transactions_data = safe_storage_get('myMoney_transactions', json.dumps(default_transactions))
+    categories_data = safe_storage_get('myMoney_categories', json.dumps(default_categories))
+    budgets_data = safe_storage_get('myMoney_budgets', json.dumps(default_budgets))
     
-    if 'myMoney_categories' not in localStorage:
-        categories = {
-            'expense': [
-                {'id': 'food', 'name': 'Food & Drinks', 'color': '#FF5722', 'icon': '🍔'},
-                {'id': 'transport', 'name': 'Transportation', 'color': '#2196F3', 'icon': '🚗'},
-                {'id': 'shopping', 'name': 'Shopping', 'color': '#E91E63', 'icon': '🛍️'},
-                {'id': 'home', 'name': 'Housing', 'color': '#9C27B0', 'icon': '🏠'},
-                {'id': 'entertainment', 'name': 'Entertainment', 'color': '#FFC107', 'icon': '🎬'},
-                {'id': 'health', 'name': 'Health', 'color': '#4CAF50', 'icon': '💊'},
-                {'id': 'education', 'name': 'Education', 'color': '#3F51B5', 'icon': '📚'},
-                {'id': 'other', 'name': 'Other', 'color': '#607D8B', 'icon': '📦'}
-            ],
-            'income': [
-                {'id': 'salary', 'name': 'Salary', 'color': '#4CAF50', 'icon': '💼'},
-                {'id': 'business', 'name': 'Business', 'color': '#2196F3', 'icon': '📈'},
-                {'id': 'gift', 'name': 'Gifts', 'color': '#E91E63', 'icon': '🎁'},
-                {'id': 'interest', 'name': 'Interest', 'color': '#FFC107', 'icon': '💰'},
-                {'id': 'other_income', 'name': 'Other', 'color': '#607D8B', 'icon': '📦'}
-            ]
-        }
-        localStorage['myMoney_categories'] = json.dumps(categories)
-    
-    if 'myMoney_budgets' not in localStorage:
-        budgets = [
-            {'id': 'food', 'amount': 500, 'spent': 0},
-            {'id': 'transport', 'amount': 300, 'spent': 0},
-            {'id': 'shopping', 'amount': 200, 'spent': 0},
-            {'id': 'entertainment', 'amount': 150, 'spent': 0}
-        ]
-        localStorage['myMoney_budgets'] = json.dumps(budgets)
+    # Store the data
+    safe_storage_set('myMoney_transactions', transactions_data)
+    safe_storage_set('myMoney_categories', categories_data)
+    safe_storage_set('myMoney_budgets', budgets_data)
 
 # Get data
 def get_transactions():
-    return json.loads(localStorage['myMoney_transactions'])
+    try:
+        data = safe_storage_get('myMoney_transactions', json.dumps(default_transactions))
+        return json.loads(data)
+    except:
+        return default_transactions
 
 def get_categories():
-    return json.loads(localStorage['myMoney_categories'])
+    try:
+        data = safe_storage_get('myMoney_categories', json.dumps(default_categories))
+        return json.loads(data)
+    except:
+        return default_categories
 
 def get_budgets():
-    return json.loads(localStorage['myMoney_budgets'])
+    try:
+        data = safe_storage_get('myMoney_budgets', json.dumps(default_budgets))
+        return json.loads(data)
+    except:
+        return default_budgets
 
 # Save data
 def save_transactions(transactions):
-    localStorage['myMoney_transactions'] = json.dumps(transactions)
+    try:
+        safe_storage_set('myMoney_transactions', json.dumps(transactions))
+    except:
+        pass  # Fail silently
 
 def save_budgets(budgets):
-    localStorage['myMoney_budgets'] = json.dumps(budgets)
+    try:
+        safe_storage_set('myMoney_budgets', json.dumps(budgets))
+    except:
+        pass  # Fail silently
 
 # Calculate summary
 def calculate_summary():
