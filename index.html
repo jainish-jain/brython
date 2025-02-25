@@ -2,142 +2,146 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyMoney - Track Expenses & Budget</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.3/brython_stdlib.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.10.5/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.10.5/brython_stdlib.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #F5F5F5;
-            --text-color: #333333;
-            --light-gray: #EEEEEE;
-            --red: #F44336;
-            --green: #4CAF50;
-        }
-        
         * {
             box-sizing: border-box;
-            font-family: 'Roboto', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
         }
         
         body {
-            background-color: #FAFAFA;
-            color: var(--text-color);
-        }
-        
-        .app-container {
-            max-width: 480px;
-            margin: 0 auto;
-            background-color: white;
-            min-height: 100vh;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #f5f5f5;
+            color: #333;
         }
         
         header {
-            background-color: var(--primary-color);
+            background-color: #4CAF50;
             color: white;
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
-        .header-title {
-            font-size: 18px;
-            font-weight: bold;
+        .container {
+            margin-top: 70px;
+            margin-bottom: 70px;
+            padding: 15px;
         }
         
-        .header-actions {
-            display: flex;
-            gap: 16px;
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            padding: 15px;
         }
         
         .summary-card {
-            padding: 16px;
-            background-color: white;
-            margin: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
         }
         
-        .balance-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .balance-label {
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .balance-amount {
+        .balance {
             font-size: 24px;
             font-weight: bold;
+            margin-bottom: 10px;
         }
         
-        .expense-income-row {
+        .expense-income {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
         }
         
-        .expense-box, .income-box {
-            flex: 1;
-        }
-        
-        .expense-amount {
-            color: var(--red);
-            font-weight: bold;
-        }
-        
-        .income-amount {
-            color: var(--green);
-            font-weight: bold;
-        }
-        
-        .transactions-list {
-            margin: 16px;
-        }
-        
-        .transactions-header {
+        .action-buttons {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-income {
+            background-color: #4CAF50;
+        }
+        
+        .btn-expense {
+            background-color: #f44336;
+        }
+        
+        .transaction-list {
+            margin-top: 20px;
         }
         
         .transaction-item {
             display: flex;
-            padding: 12px;
-            border-bottom: 1px solid var(--light-gray);
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transaction-details {
+            display: flex;
             align-items: center;
         }
         
         .transaction-icon {
             width: 40px;
             height: 40px;
-            background-color: var(--light-gray);
-            border-radius: 20px;
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-right: 12px;
+            margin-right: 15px;
         }
         
-        .transaction-details {
-            flex: 1;
+        .expense-icon {
+            background-color: #ffebee;
+            color: #f44336;
         }
         
-        .transaction-title {
-            font-weight: 500;
+        .income-icon {
+            background-color: #e8f5e9;
+            color: #4CAF50;
         }
         
-        .transaction-category {
+        .transaction-info h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .transaction-info p {
             font-size: 12px;
-            color: #666;
+            color: #777;
         }
         
         .transaction-amount {
@@ -145,804 +149,742 @@
         }
         
         .expense-amount {
-            color: var(--red);
+            color: #f44336;
         }
         
         .income-amount {
-            color: var(--green);
+            color: #4CAF50;
         }
         
-        .bottom-nav {
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .category-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .category-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 20px;
+        }
+        
+        .category-name {
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .nav-bar {
             position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 480px;
-            margin: 0 auto;
+            width: 100%;
             background-color: white;
             display: flex;
             justify-content: space-around;
-            padding: 8px 0;
-            border-top: 1px solid var(--light-gray);
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         }
         
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px 16px;
+            padding: 5px;
             cursor: pointer;
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 5px;
         }
         
         .nav-item.active {
-            color: var(--primary-color);
+            color: #4CAF50;
         }
         
-        .fab {
-            position: fixed;
-            bottom: 72px;
-            right: 16px;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            font-size: 24px;
+        .nav-label {
+            font-size: 12px;
         }
         
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 100;
-        }
-        
-        .modal-content {
-            background-color: white;
-            border-radius: 8px 8px 0 0;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 16px;
-            animation: slide-up 0.3s ease;
-        }
-        
-        @keyframes slide-up {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .close-btn {
-            cursor: pointer;
-            font-size: 24px;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #666;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--light-gray);
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        
-        .type-selector {
-            display: flex;
-            margin-bottom: 16px;
-        }
-        
-        .type-btn {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            background-color: var(--light-gray);
-            cursor: pointer;
-        }
-        
-        .type-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .type-btn:first-child {
-            border-radius: 4px 0 0 4px;
-        }
-        
-        .type-btn:last-child {
-            border-radius: 0 4px 4px 0;
-        }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        /* View selectors */
-        #home-view, #statistics-view, #budget-view, #settings-view {
-            padding-bottom: 64px;
-        }
-        
-        #statistics-view, #budget-view, #settings-view {
+        #budget-page, #report-page, #account-page {
             display: none;
         }
         
-        /* Statistics View */
         .chart-container {
-            background-color: white;
-            margin: 16px;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            margin: 20px 0;
+            height: 200px;
+            position: relative;
         }
         
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
+        .no-transactions {
+            text-align: center;
+            padding: 20px;
+            color: #777;
         }
         
-        .period-selector {
-            display: flex;
-            background-color: var(--light-gray);
-            border-radius: 4px;
-            overflow: hidden;
+        .date-filter {
+            margin-bottom: 15px;
+            text-align: center;
         }
         
-        .period-btn {
+        .date-btn {
+            background-color: #f1f1f1;
+            border: none;
             padding: 8px 12px;
+            margin: 0 5px;
+            border-radius: 15px;
             cursor: pointer;
         }
         
-        .period-btn.active {
-            background-color: var(--primary-color);
+        .date-btn.active {
+            background-color: #4CAF50;
             color: white;
-        }
-        
-        .chart {
-            height: 200px;
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-        }
-        
-        .chart-bar {
-            flex: 1;
-            background-color: var(--primary-color);
-            height: 0;
-            transition: height 0.5s ease;
-            position: relative;
-            min-width: 24px;
-        }
-        
-        .chart-bar-label {
-            position: absolute;
-            top: -20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 12px;
-        }
-        
-        .chart-bar-value {
-            position: absolute;
-            top: -40px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .categories-list {
-            margin: 16px;
-        }
-        
-        .category-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-        
-        .category-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 8px;
-            margin-right: 8px;
-        }
-        
-        .category-name {
-            flex: 1;
-        }
-        
-        .category-percentage {
-            margin-right: 8px;
-            color: #666;
-        }
-        
-        /* Budget View */
-        .budget-card {
-            background-color: white;
-            margin: 16px;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .budget-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-        
-        .budget-progress {
-            height: 8px;
-            background-color: var(--light-gray);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        
-        .budget-bar {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: 0;
-            transition: width 0.5s ease;
-        }
-        
-        .budget-bar.over {
-            background-color: var(--red);
-        }
-        
-        .budget-details {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #666;
-        }
-        
-        /* Settings View */
-        .settings-list {
-            margin: 16px;
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .settings-item {
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--light-gray);
-        }
-        
-        .settings-item:last-child {
-            border-bottom: none;
-        }
-        
-        .settings-icon {
-            margin-right: 12px;
-            color: #666;
-        }
-        
-        .settings-title {
-            flex: 1;
-        }
-        
-        .settings-arrow {
-            color: #666;
         }
     </style>
 </head>
-<body onload="brython()">
-<div class="app-container">
+<body onload="brython(1)">
     <header>
-        <div class="header-title">MyMoney</div>
-        <div class="header-actions">
-            <div id="search-btn">🔍</div>
-            <div id="more-btn">⋮</div>
-        </div>
+        <h1>MyMoney</h1>
     </header>
     
-    <!-- Home View -->
-    <div id="home-view">
+    <div class="container" id="home-page">
         <div class="summary-card">
-            <div class="balance-row">
-                <div class="balance-label">Current Balance</div>
-                <div class="balance-amount" id="balance-amount">$0.00</div>
+            <div class="balance">
+                Balance: $<span id="total-balance">0.00</span>
             </div>
-            <div class="expense-income-row">
-                <div class="expense-box">
-                    <div class="balance-label">Expense</div>
-                    <div class="expense-amount" id="expense-amount">$0.00</div>
+            <div class="expense-income">
+                <div>
+                    <p>Income</p>
+                    <p>$<span id="total-income">0.00</span></p>
                 </div>
-                <div class="income-box">
-                    <div class="balance-label">Income</div>
-                    <div class="income-amount" id="income-amount">$0.00</div>
+                <div>
+                    <p>Expense</p>
+                    <p>$<span id="total-expense">0.00</span></p>
                 </div>
             </div>
         </div>
         
-        <div class="transactions-list">
-            <div class="transactions-header">
-                <div>Recent Transactions</div>
-                <div id="view-all">View All</div>
-            </div>
-            <div id="transactions-container">
-                <!-- Transactions will be added here -->
+        <div class="action-buttons">
+            <button class="btn btn-income" id="add-income-btn">+ Income</button>
+            <button class="btn btn-expense" id="add-expense-btn">- Expense</button>
+        </div>
+        
+        <div class="date-filter">
+            <button class="date-btn active" data-period="all">All</button>
+            <button class="date-btn" data-period="today">Today</button>
+            <button class="date-btn" data-period="week">This Week</button>
+            <button class="date-btn" data-period="month">This Month</button>
+        </div>
+        
+        <div class="card">
+            <h2>Recent Transactions</h2>
+            <div id="transaction-list" class="transaction-list">
+                <div class="no-transactions">
+                    <p>No transactions yet</p>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Statistics View -->
-    <div id="statistics-view">
-        <div class="chart-container">
-            <div class="chart-header">
-                <div>Expense Analysis</div>
-                <div class="period-selector">
-                    <div class="period-btn active" data-period="week">Week</div>
-                    <div class="period-btn" data-period="month">Month</div>
-                    <div class="period-btn" data-period="year">Year</div>
+    <div class="container" id="budget-page">
+        <div class="card">
+            <h2>Monthly Budget</h2>
+            <div class="action-buttons">
+                <button class="btn" id="add-budget-btn">Add Budget</button>
+            </div>
+            <div id="budget-list">
+                <div class="no-transactions">
+                    <p>No budgets set</p>
                 </div>
             </div>
-            <div class="chart" id="expense-chart">
-                <!-- Chart bars will be added here -->
+        </div>
+    </div>
+    
+    <div class="container" id="report-page">
+        <div class="summary-card">
+            <div class="balance">
+                Total Spent: $<span id="report-total-expense">0.00</span>
             </div>
         </div>
         
-        <div class="categories-list">
-            <div class="transactions-header">
-                <div>Categories</div>
-                <div>February 2025</div>
+        <div class="date-filter">
+            <button class="date-btn active" data-period="month">This Month</button>
+            <button class="date-btn" data-period="3months">3 Months</button>
+            <button class="date-btn" data-period="year">This Year</button>
+            <button class="date-btn" data-period="all">All Time</button>
+        </div>
+        
+        <div class="card">
+            <h2>Expense by Category</h2>
+            <div class="chart-container" id="category-chart">
+                <div class="no-transactions">
+                    <p>No data to display</p>
+                </div>
             </div>
-            <div id="categories-container">
-                <!-- Categories will be added here -->
+        </div>
+        
+        <div class="card">
+            <h2>Monthly Trend</h2>
+            <div class="chart-container" id="trend-chart">
+                <div class="no-transactions">
+                    <p>No data to display</p>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Budget View -->
-    <div id="budget-view">
-        <div class="transactions-header" style="margin: 16px;">
-            <div>Monthly Budgets</div>
-            <div>February 2025</div>
-        </div>
-        <div id="budgets-container">
-            <!-- Budgets will be added here -->
-        </div>
-    </div>
-    
-    <!-- Settings View -->
-    <div id="settings-view">
-        <div class="settings-list">
-            <div class="settings-item">
-                <div class="settings-icon">👤</div>
-                <div class="settings-title">Account</div>
-                <div class="settings-arrow">›</div>
-            </div>
-            <div class="settings-item">
-                <div class="settings-icon">🔔</div>
-                <div class="settings-title">Notifications</div>
-                <div class="settings-arrow">›</div>
-            </div>
-            <div class="settings-item">
-                <div class="settings-icon">💵</div>
-                <div class="settings-title">Currency</div>
-                <div class="settings-arrow">›</div>
-            </div>
-            <div class="settings-item">
-                <div class="settings-icon">🔄</div>
-                <div class="settings-title">Backup & Restore</div>
-                <div class="settings-arrow">›</div>
-            </div>
-            <div class="settings-item">
-                <div class="settings-icon">🎨</div>
-                <div class="settings-title">Theme</div>
-                <div class="settings-arrow">›</div>
-            </div>
-            <div class="settings-item">
-                <div class="settings-icon">❓</div>
-                <div class="settings-title">Help & Support</div>
-                <div class="settings-arrow">›</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Add Expense/Income Modal -->
-    <div class="modal" id="add-transaction-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Add Transaction</div>
-                <div class="close-btn" id="close-modal">×</div>
-            </div>
-            <div class="type-selector">
-                <div class="type-btn active" data-type="expense">Expense</div>
-                <div class="type-btn" data-type="income">Income</div>
-            </div>
+    <div class="container" id="account-page">
+        <div class="card">
+            <h2>Account Settings</h2>
             <div class="form-group">
-                <label for="amount">Amount</label>
-                <input type="number" id="amount" placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select id="category">
-                    <option value="">Select Category</option>
-                    <!-- Categories will be added here -->
+                <label for="currency-setting">Currency</label>
+                <select id="currency-setting">
+                    <option value="$">USD ($)</option>
+                    <option value="€">EUR (€)</option>
+                    <option value="£">GBP (£)</option>
+                    <option value="¥">JPY (¥)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date">
+                <button class="btn" id="export-data">Export Data</button>
             </div>
             <div class="form-group">
-                <label for="note">Note</label>
-                <input type="text" id="note" placeholder="Add a note">
+                <button class="btn" id="import-data">Import Data</button>
             </div>
-            <button class="submit-btn" id="save-transaction">Save</button>
+            <div class="form-group">
+                <button class="btn btn-expense" id="clear-data">Clear All Data</button>
+            </div>
         </div>
     </div>
     
-    <!-- Navigation -->
-    <div class="fab" id="add-transaction-btn">+</div>
-    <div class="bottom-nav">
-        <div class="nav-item active" data-view="home-view">
-            <div>🏠</div>
-            <div>Home</div>
+    <div class="nav-bar">
+        <div class="nav-item active" data-page="home-page">
+            <i class="fas fa-home"></i>
+            <span class="nav-label">Home</span>
         </div>
-        <div class="nav-item" data-view="statistics-view">
-            <div>📊</div>
-            <div>Stats</div>
+        <div class="nav-item" data-page="budget-page">
+            <i class="fas fa-wallet"></i>
+            <span class="nav-label">Budget</span>
         </div>
-        <div class="nav-item" data-view="budget-view">
-            <div>💰</div>
-            <div>Budget</div>
+        <div class="nav-item" data-page="report-page">
+            <i class="fas fa-chart-pie"></i>
+            <span class="nav-label">Report</span>
         </div>
-        <div class="nav-item" data-view="settings-view">
-            <div>⚙️</div>
-            <div>Settings</div>
+        <div class="nav-item" data-page="account-page">
+            <i class="fas fa-user"></i>
+            <span class="nav-label">Account</span>
         </div>
     </div>
-</div>
+    
+    <!-- Transaction Modal -->
+    <div id="transaction-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="transaction-modal-title">Add Expense</h2>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="expense">Expense</div>
+                <div class="tab" data-tab="income">Income</div>
+            </div>
+            
+            <div class="tab-content active" id="expense-tab">
+                <div class="form-group">
+                    <label for="expense-amount">Amount</label>
+                    <input type="number" id="expense-amount" placeholder="0.00" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="expense-category">Category</label>
+                    <div class="category-grid">
+                        <div class="category-item" data-category="Food">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="category-name">Food</div>
+                        </div>
+                        <div class="category-item" data-category="Transport">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="category-name">Transport</div>
+                        </div>
+                        <div class="category-item" data-category="Shopping">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="category-name">Shopping</div>
+                        </div>
+                        <div class="category-item" data-category="Bills">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <div class="category-name">Bills</div>
+                        </div>
+                        <div class="category-item" data-category="Entertainment">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-film"></i>
+                            </div>
+                            <div class="category-name">Entertainment</div>
+                        </div>
+                        <div class="category-item" data-category="Health">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div class="category-name">Health</div>
+                        </div>
+                        <div class="category-item" data-category="Education">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="category-name">Education</div>
+                        </div>
+                        <div class="category-item" data-category="Other">
+                            <div class="category-icon expense-icon">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </div>
+                            <div class="category-name">Other</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="expense-category-input" value="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="expense-date">Date</label>
+                    <input type="date" id="expense-date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="expense-note">Note (Optional)</label>
+                    <input type="text" id="expense-note" placeholder="Add note">
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-expense" id="save-expense-btn">Save</button>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="income-tab">
+                <div class="form-group">
+                    <label for="income-amount">Amount</label>
+                    <input type="number" id="income-amount" placeholder="0.00" step="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <label for="income-category">Category</label>
+                    <div class="category-grid">
+                        <div class="category-item" data-category="Salary">
+                            <div class="category-icon income-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <div class="category-name">Salary</div>
+                        </div>
+                        <div class="category-item" data-category="Business">
+                            <div class="category-icon income-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="category-name">Business</div>
+                        </div>
+                        <div class="category-item" data-category="Gift">
+                            <div class="category-icon income-icon">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <div class="category-name">Gift</div>
+                        </div>
+                        <div class="category-item" data-category="Other">
+                            <div class="category-icon income-icon">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </div>
+                            <div class="category-name">Other</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="income-category-input" value="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="income-date">Date</label>
+                    <input type="date" id="income-date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="income-note">Note (Optional)</label>
+                    <input type="text" id="income-note" placeholder="Add note">
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-income" id="save-income-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Budget Modal -->
+    <div id="budget-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Budget</h2>
+            
+            <div class="form-group">
+                <label for="budget-category">Category</label>
+                <select id="budget-category">
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Bills">Bills</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Health">Health</option>
+                    <option value="Education">Education</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="budget-amount">Monthly Limit</label>
+                <input type="number" id="budget-amount" placeholder="0.00" step="0.01">
+            </div>
+            
+            <div class="form-group">
+                <button class="btn" id="save-budget-btn">Save</button>
+            </div>
+        </div>
+    </div>
 
-<script type="text/python">
-from browser import document, window, alert, html
-import json
+    <script type="text/python">
+from browser import document, window, alert, localStorage, html
 import datetime
-import random
+import json
 
-# Helper function to safely use localStorage
-def safe_storage_set(key, value):
-    try:
-        window.localStorage.setItem(key, value)
-    except:
-        pass  # Fail silently
+# Initialize data storage
+def init_storage():
+    if not localStorage.get('transactions'):
+        localStorage['transactions'] = json.dumps([])
+    if not localStorage.get('budgets'):
+        localStorage['budgets'] = json.dumps([])
+    if not localStorage.get('settings'):
+        default_settings = {
+            'currency': '$'
+        }
+        localStorage['settings'] = json.dumps(default_settings)
 
-def safe_storage_get(key, default=None):
-    try:
-        return window.localStorage.getItem(key) or default
-    except:
-        return default
+# Load data from localStorage
+def load_transactions():
+    return json.loads(localStorage['transactions'])
 
-# Create sample data for demo if storage is unavailable
-default_transactions = [
-    {"id": "1", "type": "expense", "amount": "45.50", "category": "food", "date": "2025-02-24", "note": "Grocery shopping"},
-    {"id": "2", "type": "expense", "amount": "35.00", "category": "transport", "date": "2025-02-23", "note": "Uber ride"},
-    {"id": "3", "type": "income", "amount": "1500.00", "category": "salary", "date": "2025-02-15", "note": "February salary"},
-    {"id": "4", "type": "expense", "amount": "12.99", "category": "entertainment", "date": "2025-02-20", "note": "Movie ticket"},
-    {"id": "5", "type": "expense", "amount": "78.50", "category": "shopping", "date": "2025-02-18", "note": "New shirt"}
-]
+def load_budgets():
+    return json.loads(localStorage['budgets'])
 
-default_categories = {
-    "expense": [
-        {"id": "food", "name": "Food & Drinks", "color": "#FF5722", "icon": "🍔"},
-        {"id": "transport", "name": "Transportation", "color": "#2196F3", "icon": "🚗"},
-        {"id": "shopping", "name": "Shopping", "color": "#E91E63", "icon": "🛍️"},
-        {"id": "home", "name": "Housing", "color": "#9C27B0", "icon": "🏠"},
-        {"id": "entertainment", "name": "Entertainment", "color": "#FFC107", "icon": "🎬"},
-        {"id": "health", "name": "Health", "color": "#4CAF50", "icon": "💊"},
-        {"id": "education", "name": "Education", "color": "#3F51B5", "icon": "📚"},
-        {"id": "other", "name": "Other", "color": "#607D8B", "icon": "📦"}
-    ],
-    "income": [
-        {"id": "salary", "name": "Salary", "color": "#4CAF50", "icon": "💼"},
-        {"id": "business", "name": "Business", "color": "#2196F3", "icon": "📈"},
-        {"id": "gift", "name": "Gifts", "color": "#E91E63", "icon": "🎁"},
-        {"id": "interest", "name": "Interest", "color": "#FFC107", "icon": "💰"},
-        {"id": "other_income", "name": "Other", "color": "#607D8B", "icon": "📦"}
-    ]
-}
+def load_settings():
+    return json.loads(localStorage['settings'])
 
-default_budgets = [
-    {"id": "food", "amount": 500, "spent": 45.50},
-    {"id": "transport", "amount": 300, "spent": 35.00},
-    {"id": "shopping", "amount": 200, "spent": 78.50},
-    {"id": "entertainment", "amount": 150, "spent": 12.99}
-]
-
-# Initialize app data
-def init_data():
-    # Try to load data from localStorage, fall back to defaults if not available
-    transactions_data = safe_storage_get('myMoney_transactions', json.dumps(default_transactions))
-    categories_data = safe_storage_get('myMoney_categories', json.dumps(default_categories))
-    budgets_data = safe_storage_get('myMoney_budgets', json.dumps(default_budgets))
-    
-    # Store the data
-    safe_storage_set('myMoney_transactions', transactions_data)
-    safe_storage_set('myMoney_categories', categories_data)
-    safe_storage_set('myMoney_budgets', budgets_data)
-
-# Get data
-def get_transactions():
-    try:
-        data = safe_storage_get('myMoney_transactions', json.dumps(default_transactions))
-        return json.loads(data)
-    except:
-        return default_transactions
-
-def get_categories():
-    try:
-        data = safe_storage_get('myMoney_categories', json.dumps(default_categories))
-        return json.loads(data)
-    except:
-        return default_categories
-
-def get_budgets():
-    try:
-        data = safe_storage_get('myMoney_budgets', json.dumps(default_budgets))
-        return json.loads(data)
-    except:
-        return default_budgets
-
-# Save data
+# Save data to localStorage
 def save_transactions(transactions):
-    try:
-        safe_storage_set('myMoney_transactions', json.dumps(transactions))
-    except:
-        pass  # Fail silently
+    localStorage['transactions'] = json.dumps(transactions)
 
 def save_budgets(budgets):
-    try:
-        safe_storage_set('myMoney_budgets', json.dumps(budgets))
-    except:
-        pass  # Fail silently
+    localStorage['budgets'] = json.dumps(budgets)
 
-# Calculate summary
-def calculate_summary():
-    transactions = get_transactions()
-    income = sum(float(t['amount']) for t in transactions if t['type'] == 'income')
-    expense = sum(float(t['amount']) for t in transactions if t['type'] == 'expense')
-    balance = income - expense
-    
-    document['balance-amount'].text = f"${balance:.2f}"
-    document['income-amount'].text = f"${income:.2f}"
-    document['expense-amount'].text = f"${expense:.2f}"
+def save_settings(settings):
+    localStorage['settings'] = json.dumps(settings)
 
-# Format date
-def format_date(date_str):
-    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    return date_obj.strftime('%b %d')
+# Format currency
+def format_currency(amount):
+    settings = load_settings()
+    return f"{settings['currency']}{float(amount):.2f}"
 
-# Render transactions
-def render_transactions():
-    transactions = get_transactions()
-    categories = get_categories()
-    container = document['transactions-container']
-    container.innerHTML = ""
+# Date functions
+def today():
+    now = datetime.datetime.now()
+    return now.strftime("%Y-%m-%d")
+
+def get_date_range(period):
+    today_date = datetime.datetime.now()
     
-    # Sort by date (newest first)
-    transactions.sort(key=lambda x: x['date'], reverse=True)
+    if period == "today":
+        start_date = today_date
+    elif period == "week":
+        start_date = today_date - datetime.timedelta(days=today_date.weekday())
+    elif period == "month":
+        start_date = today_date.replace(day=1)
+    elif period == "3months":
+        start_date = (today_date - datetime.timedelta(days=90)).replace(day=1)
+    elif period == "year":
+        start_date = today_date.replace(month=1, day=1)
+    else:  # "all"
+        return None, None
     
-    # Take only the 5 most recent
-    recent_transactions = transactions[:5]
+    start_str = start_date.strftime("%Y-%m-%d")
+    end_str = today_date.strftime("%Y-%m-%d")
     
-    for transaction in recent_transactions:
-        tx_type = transaction['type']
-        category_list = categories[tx_type]
-        category = next((c for c in category_list if c['id'] == transaction['category']), None)
+    return start_str, end_str
+
+def filter_transactions_by_date(transactions, period):
+    if period == "all":
+        return transactions
+    
+    start_date, end_date = get_date_range(period)
+    if not start_date:
+        return transactions
+    
+    filtered = []
+    for transaction in transactions:
+        if start_date <= transaction['date'] <= end_date:
+            filtered.append(transaction)
+    
+    return filtered
+
+# Update UI functions
+def update_balance_display():
+    transactions = load_transactions()
+    
+    total_income = sum(float(t['amount']) for t in transactions if t['type'] == 'income')
+    total_expense = sum(float(t['amount']) for t in transactions if t['type'] == 'expense')
+    balance = total_income - total_expense
+    
+    document['total-balance'].textContent = f"{balance:.2f}"
+    document['total-income'].textContent = f"{total_income:.2f}"
+    document['total-expense'].textContent = f"{total_expense:.2f}"
+    document['report-total-expense'].textContent = f"{total_expense:.2f}"
+
+def update_transaction_list(period="all"):
+    transactions = load_transactions()
+    filtered_transactions = filter_transactions_by_date(transactions, period)
+    transaction_list = document['transaction-list']
+    
+    # Clear current list
+    transaction_list.innerHTML = ""
+    
+    if not filtered_transactions:
+        transaction_list.innerHTML = """
+        <div class="no-transactions">
+            <p>No transactions yet</p>
+        </div>
+        """
+        return
+    
+    # Sort transactions by date (newest first)
+    filtered_transactions.sort(key=lambda x: x['date'], reverse=True)
+    
+    for transaction in filtered_transactions:
+        transaction_type = transaction['type']
+        icon_class = "income-icon" if transaction_type == "income" else "expense-icon"
+        amount_class = "income-amount" if transaction_type == "income" else "expense-amount"
+        amount_prefix = "" if transaction_type == "expense" else "+"
         
-        if category:
-            icon = category['icon']
-            category_name = category['name']
+        # Get appropriate icon based on category
+        icon = "fa-dollar-sign"  # Default
+        if transaction_type == "income":
+            if transaction['category'] == "Salary":
+                icon = "fa-briefcase"
+            elif transaction['category'] == "Business":
+                icon = "fa-store"
+            elif transaction['category'] == "Gift":
+                icon = "fa-gift"
         else:
-            icon = '📦'
-            category_name = 'Uncategorized'
+            if transaction['category'] == "Food":
+                icon = "fa-utensils"
+            elif transaction['category'] == "Transport":
+                icon = "fa-car"
+            elif transaction['category'] == "Shopping":
+                icon = "fa-shopping-bag"
+            elif transaction['category'] == "Bills":
+                icon = "fa-file-invoice-dollar"
+            elif transaction['category'] == "Entertainment":
+                icon = "fa-film"
+            elif transaction['category'] == "Health":
+                icon = "fa-heartbeat"
+            elif transaction['category'] == "Education":
+                icon = "fa-graduation-cap"
         
-        amount_class = 'expense-amount' if tx_type == 'expense' else 'income-amount'
-        amount_prefix = '-' if tx_type == 'expense' else '+'
+        transaction_item = html.DIV(Class="transaction-item")
         
-        item = html.DIV(Class='transaction-item')
-        item <= html.DIV(icon, Class='transaction-icon')
+        transaction_details = html.DIV(Class="transaction-details")
+        transaction_icon = html.DIV(Class=f"transaction-icon {icon_class}")
+        transaction_icon <= html.I(Class=f"fas {icon}")
+        transaction_details <= transaction_icon
         
-        details = html.DIV(Class='transaction-details')
-        details <= html.DIV(transaction['note'] or category_name, Class='transaction-title')
-        details <= html.DIV(f"{category_name} • {format_date(transaction['date'])}", Class='transaction-category')
+        transaction_info = html.DIV(Class="transaction-info")
+        transaction_info <= html.H3(transaction['category'])
+        transaction_info <= html.P(transaction['note'] if transaction['note'] else "No description")
+        transaction_details <= transaction_info
         
-        item <= details
-        item <= html.DIV(f"{amount_prefix}${float(transaction['amount']):.2f}", Class=f'transaction-amount {amount_class}')
+        transaction_item <= transaction_details
         
-        container <= item
+        transaction_amount = html.DIV(Class=f"transaction-amount {amount_class}")
+        settings = load_settings()
+        amount_text = f"{amount_prefix}{settings['currency']}{float(transaction['amount']):.2f}"
+        transaction_amount <= amount_text
+        
+        transaction_item <= transaction_amount
+        
+        transaction_list <= transaction_item
 
-# Render expense chart
-def render_expense_chart():
-    transactions = get_transactions()
-    chart = document['expense-chart']
-    chart.innerHTML = ""
+def update_budget_list():
+    budgets = load_budgets()
+    transactions = load_transactions()
+    budget_list = document['budget-list']
     
-    # Get current date
-    today = datetime.datetime.now()
+    # Clear current list
+    budget_list.innerHTML = ""
     
-    # Create weekly data (last 7 days)
-    weekly_data = []
-    for i in range(6, -1, -1):
-        date = today - datetime.timedelta(days=i)
-        date_str = date.strftime('%Y-%m-%d')
-        day_label = date.strftime('%a')
-        
-        day_expenses = sum(float(t['amount']) for t in transactions 
-                         if t['type'] == 'expense' and t['date'] == date_str)
-        
-        weekly_data.append({
-            'label': day_label,
-            'value': day_expenses
-        })
+    if not budgets:
+        budget_list.innerHTML = """
+        <div class="no-transactions">
+            <p>No budgets set</p>
+        </div>
+        """
+        return
     
-    # Find maximum value for scaling
-    max_value = max(item['value'] for item in weekly_data) if weekly_data else 1
-    if max_value == 0:
-        max_value = 1  # Avoid division by zero
+    # Get current month expenses by category
+    today_date = datetime.datetime.now()
+    start_of_month = today_date.replace(day=1).strftime("%Y-%m-%d")
+    end_of_month = today_date.strftime("%Y-%m-%d")
     
-    # Render bars
-    for item in weekly_data:
-        height = (item['value'] / max_value) * 100
-        height = max(height, 5)  # Minimum height for visibility
-        
-        bar = html.DIV(Class='chart-bar', style={'height': f'{height}%'})
-        bar <= html.DIV(item['label'], Class='chart-bar-label')
-        bar <= html.DIV(f"${item['value']:.0f}", Class='chart-bar-value')
-        
-        chart <= bar
-
-# Render category distribution
-def render_categories_stats():
-    transactions = get_transactions()
-    categories = get_categories()
-    container = document['categories-container']
-    container.innerHTML = ""
+    expenses_by_category = {}
+    for transaction in transactions:
+        if transaction['type'] == 'expense' and start_of_month <= transaction['date'] <= end_of_month:
+            category = transaction['category']
+            amount = float(transaction['amount'])
+            if category in expenses_by_category:
+                expenses_by_category[category] += amount
+            else:
+                expenses_by_category[category] = amount
     
-    # Get current month transactions
-    today = datetime.datetime.now()
-    month_start = datetime.datetime(today.year, today.month, 1)
-    month_start_str = month_start.strftime('%Y-%m-%d')
-    
-    month_transactions = [t for t in transactions 
-                        if t['type'] == 'expense' and t['date'] >= month_start_str]
-    
-    total_expense = sum(float(t['amount']) for t in month_transactions)
-    
-    # Calculate category totals
-    category_totals = {}
-    for transaction in month_transactions:
-        category_id = transaction['category']
-        if category_id not in category_totals:
-            category_totals[category_id] = 0
-        category_totals[category_id] += float(transaction['amount'])
-    
-    # Sort by amount (descending)
-    sorted_categories = sorted([(cid, amount) for cid, amount in category_totals.items()], 
-                              key=lambda x: x[1], reverse=True)
-    
-    # Render category items
-    for category_id, amount in sorted_categories:
-        category = next((c for c in categories['expense'] if c['id'] == category_id), None)
-        
-        if category:
-            percentage = (amount / total_expense * 100) if total_expense > 0 else 0
-            
-            item = html.DIV(Class='category-item')
-            item <= html.DIV(Class='category-color', style={'background-color': category['color']})
-            item <= html.DIV(category['name'], Class='category-name')
-            item <= html.DIV(f"{percentage:.1f}%", Class='category-percentage')
-            item <= html.DIV(f"${amount:.2f}", Class='transaction-amount expense-amount')
-            
-            container <= item
-
-# Render budgets
-def render_budgets():
-    budgets = get_budgets()
-    transactions = get_transactions()
-    categories = get_categories()
-    container = document['budgets-container']
-    container.innerHTML = ""
-    
-    # Get current month transactions
-    today = datetime.datetime.now()
-    month_start = datetime.datetime(today.year, today.month, 1)
-    month_start_str = month_start.strftime('%Y-%m-%d')
-    
-    # Calculate spent amount for each budget
     for budget in budgets:
-        category_id = budget['id']
-        budget['spent'] = sum(float(t['amount']) for t in transactions 
-                           if t['type'] == 'expense' and t['category'] == category_id 
-                           and t['date'] >= month_start_str)
+        category = budget['category']
+        limit = float(budget['amount'])
+        spent = expenses_by_category.get(category, 0)
+        percentage = min(100, (spent / limit) * 100) if limit > 0 else 0
+        
+        budget_item = html.DIV(Class="card")
+        
+        header = html.DIV(style="display: flex; justify-content: space-between; margin-bottom: 10px;")
+        header <= html.H3(category)
+        
+        settings = load_settings()
+        amount_text = f"{settings['currency']}{spent:.2f} / {settings['currency']}{limit:.2f}"
+        header <= html.P(amount_text)
+        
+        budget_item <= header
+        
+        progress_container = html.DIV(style="background-color: #f1f1f1; border-radius: 10px; height: 15px;")
+        progress_color = "#4CAF50" if percentage < 80 else "#FF9800" if percentage < 100 else "#F44336"
+        progress_bar = html.DIV(style=f"background-color: {progress_color}; height: 15px; border-radius: 10px; width: {percentage}%;")
+        
+        progress_container <= progress_bar
+        budget_item <= progress_container
+        
+        budget_list <= budget_item
+
+# Modal functions
+def open_transaction_modal(event=None, type="expense"):
+    modal = document['transaction-modal']
+    modal.style.display = "block"
     
-    # Save updated budgets
-    save_budgets(budgets)
+    # Set default date to today
+    document['expense-date'].value = today()
+    document['income-date'].value = today()
     
-    # Render budget cards
-    for budget in budgets:
-        category = next((c for c in categories['expense'] if c['id'] == budget['id']), None)
-        if not category:
-            continue
-        
-        budget_amount = float(budget['amount'])
-        spent_amount = float(budget['spent'])
-        
-        percentage = (spent_amount / budget_amount * 100) if budget_amount > 0 else 0
-        over_budget = percentage > 100
-        bar_class = 'budget-bar over' if over_budget else 'budget-bar'
-        
-        card = html.DIV(Class='budget-card')
-        
-        header = html.DIV(Class='budget-header')
-        header <= html.DIV(f"{category['icon']} {category['name']}")
-        header <= html.DIV(f"${spent_amount:.2f} / ${budget_amount:.2f}")
-        
-        card <= header
-        
-        progress = html.DIV(Class='budget-progress')
-        bar = html.DIV(Class=bar_class, style={'width': f"{min(percentage, 100)}%"})
-        progress <= bar
-        
-        card <= progress
-        
-        details = html.DIV(Class='budget-details')
-        details <= html.DIV(f"{percentage:.1f}% used")
-        
-        remaining = budget_amount - spent_amount
-        details <= html.DIV(f"${abs(remaining):.2f} {'over' if remaining < 0 else 'left'}")
-        
-        card <= details
+    # Clear values
+    document['expense-amount'].value = ""
+    document['expense-note'].value = ""
+    document['expense-category-input'].value = ""
+    document['income-amount'].value = ""
+    document['income-note'].value = ""
+    document['income-category-input'].value = ""
+    
+    # Reset category selections
+    #for item in document.select(".category-item"):
+    #    item.classList.remove
